@@ -2,6 +2,8 @@
 from fastapi import FastAPI
 import uvicorn
 from controller.router import router
+import aiohttp
+import aiomysql
 from fastapi.middleware.cors import CORSMiddleware
 
 app=FastAPI()

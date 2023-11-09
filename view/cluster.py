@@ -2,8 +2,13 @@
 import streamlit as st
 from aiohttp import ClientSession
 import asyncio
+import aiofile
 from typing import Dict,List
+from default import OS3E
+from draw_graph import generate_topo
 from streamlit_autorefresh import st_autorefresh
+from utils.view import get_map
+from streamlit.components.v1 import html
 def template(name, value):
 
 	if type(value)==str :
@@ -12,12 +17,13 @@ def template(name, value):
 		return f'{name}={value}\n'
 	
 bar=st.sidebar #图面编辑背景
-
+show_bar=st.container()
 settings_path=''
 class Cluster(object) :
 	def __init__ (self, **kwargs) :
 		self.name = kwargs['name']
-		
+		#凡是为None的，代表是可设置变量
+		#Server
 		self.MsgBarrier='/' #写死
 		self.IP=None
 		self.PORT=None
@@ -25,7 +31,7 @@ class Cluster(object) :
 		self.WAIT_CONNECT=10
 		self.SERVER_RECV_BUFSIZE=204800000
 		self.CLIENT_RECV_BUFSIZE=204800000
-		
+		#Controller
 		self.ECHO=None
 		self.CONTROLLER_IP=None
 		self.OFP_VERSION='OpenFlow13'
@@ -38,7 +44,7 @@ class Cluster(object) :
 		self.CROSSREQUIRE_PRIORITY = 30
 		self.IDLE_TIME_OUT = 0
 		self.HARD_TIME_OUT = 0
-		
+		#Topo
 		self.TOPO=None
 		self.CONTROLLERS=None
 		self.CONTROLLER_PORTS=None
@@ -50,12 +56,12 @@ class Cluster(object) :
 		self.ADJACENCY_CONTROLLER=None
 		self.CONTROLLERS_EDGE_SWITCHES_AREA =None
 		self.CONTROLLER_EDGE_SWITCHES=None
-		
+		#MAC
 		self.UNKNOWN_MAC='00:00:00:00:00:00'
 		self.BROADCAST_MAC = 'ff:ff:ff:ff:ff:ff'
-		
+		#是否开启集群通信
 		self.IF_ARP=None
-		
+		#控制器过载阈值
 		self.CONTROLLER_PKT_THRESHOLD=None
 		
 		self.show_options()
@@ -63,45 +69,64 @@ class Cluster(object) :
 		st.title(self.name)
 	
 	def show_options(self):
-		server,  controller, = bar.tabs(
-			["Server参数", "控制器"])
-		with server:
+		server,  controller, topo,other= bar.tabs(
+			["Server参数", "控制器","拓扑","其他选项"])
+		self.server(server)
+		self.controller(controller)
+		self.topo(topo)
+		self.other(other)
+		
+		
+		self.show_topo()
+	def show_topo(self):
+
+		with open("../static/topo/OS3E.html",'r')as f:
+			topo_html=f.read()
+		with show_bar:
+			html(topo_html,width = 800,height = 600)
+		
+	
+	def server(self,server):
+		with server :
 			st.subheader("服务器配置")
 			
 			self.IP = st.selectbox('Server监听IP地址', ('192.168.10.3', '127.0.0.1'))
 			
 			self.PORT = st.number_input("Server监听端口", value = 8888)
+			
+			
+	def controller(self,controller):
 		with controller:
 			st.subheader("控制器配置")
-	
-	@staticmethod
-	def get_map(LINKS:Dict):
-		PREPARE = ["s" + str(i) for i in range(10, 60)]
-		ALL = PREPARE.copy()
-		for k in LINKS.keys() :
 			
-			if k[0] in PREPARE :
-				PREPARE.remove(k[0])
-			if k[1] in PREPARE :
-				PREPARE.remove(k[1])
-		for h in PREPARE :
-			ALL.remove(h)
+			self.ECHO = st.number_input("控制器监控周期",value=5)  # 单位秒
+			
+			self.CONTROLLER_IP = st.selectbox('控制器IP', ('127.0.0.1', '192.168.10.3'))  # 控制器的IP
+			
+			self.ECHO_DELAY = st.number_input("几个周期后开始request", value = 1, min_value = 1)  # 几个周期后开始request
+			
+			self.PERFORMANCE_STATISTIC_ECHO = st.number_input("获取交换机性能的间隔", value = 5)  # 打印交换机平均响应时延的间隔
+			
+	def topo(self,topo):
 		
-		HOSTS = { }
-		SW_LIST = [[] for _ in range(5)]  # 5个控制器
-		HOST_LIST = [[] for _ in range(5)]
+		with topo:
+			st.subheader("拓扑配置选项")
+			self.TOPO = st.selectbox('拓扑样式', ("OS3E","自定义拓扑"))
+			if self.TOPO=="OS3E":
+				os3e=OS3E()
+				
+			else:
+				#TODO
+				pass
+			st.button(label = "生成拓扑",on_click = generate_topo,kwargs = os3e.__dict__)
+			
+	def other(self,other):
 		
-		def h (x) :
-			# 3 台主机
-			return x, ["h" + x.split("s")[1] + '01', "h" + x.split("s")[1] + '02', "h" + x.split("s")[1] + '03']
-		
-		for host in map(h, ALL) :
-			HOSTS[host[0]] = host[1]
-		
-		for c in ALL :
-			SW_LIST[int(list(c)[1]) - 1].append(c)
-			# 3 台主机
-			HOST_LIST[int(list(c)[1]) - 1].append(
-				["h" + c.split("s")[1] + '01', "h" + c.split("s")[1] + '02', "h" + c.split("s")[1] + '03'])
-		
-		return HOSTS, SW_LIST, HOST_LIST
+		with other:
+			st.subheader("其他配置选项")
+			self.IF_ARP=self.TOPO = st.selectbox('是否开启通信', ("1","0"))
+			
+			self.CONTROLLER_PKT_THRESHOLD=st.number_input("控制器阈值",value=1600)
+	
+	def generate_topo(self,**kwargs):
+		pass
