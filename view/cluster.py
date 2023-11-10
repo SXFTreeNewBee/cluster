@@ -113,8 +113,9 @@ class Cluster(object) :
 			else:
 				#TODO 自定义拓扑显示
 				pass
-			st.button(label = "生成拓扑",on_click = generate_topo,kwargs = os3e.__dict__,key='topo_button')
-			
+			st.button(label = "生成拓扑",on_click = generate_topo,kwargs = os3e.__dict__,
+					  key='topo_button',use_container_width=True)
+
 	def other(self,other):
 		
 		with other:
