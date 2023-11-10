@@ -8,6 +8,7 @@ from default import OS3E
 from draw_graph import generate_topo
 from streamlit_autorefresh import st_autorefresh
 from utils.view import get_map
+import os
 from streamlit.components.v1 import html
 def template(name, value):
 
@@ -16,8 +17,8 @@ def template(name, value):
 	else:
 		return f'{name}={value}\n'
 	
-bar=st.sidebar #图面编辑背景
-show_bar=st.container()
+bar=st.sidebar #图面编辑背景,侧面栏
+
 settings_path=''
 class Cluster(object) :
 	def __init__ (self, **kwargs) :
@@ -63,6 +64,8 @@ class Cluster(object) :
 		self.IF_ARP=None
 		#控制器过载阈值
 		self.CONTROLLER_PKT_THRESHOLD=None
+		#拓扑文件
+		self.topo_html_dir=None
 		
 		self.show_options()
 	def set_title(self):
@@ -76,16 +79,6 @@ class Cluster(object) :
 		self.topo(topo)
 		self.other(other)
 		
-		
-		self.show_topo()
-	def show_topo(self):
-
-		with open("../static/topo/OS3E.html",'r')as f:
-			topo_html=f.read()
-		with show_bar:
-			html(topo_html,width = 800,height = 600)
-		
-	
 	def server(self,server):
 		with server :
 			st.subheader("服务器配置")
@@ -110,7 +103,7 @@ class Cluster(object) :
 	def topo(self,topo):
 		
 		with topo:
-			st.subheader("拓扑配置选项")
+			st.subheader("拓扑配置选项(不显示主机)")
 			self.TOPO = st.selectbox('拓扑样式', ("OS3E","自定义拓扑"))
 			if self.TOPO=="OS3E":
 				os3e=OS3E()

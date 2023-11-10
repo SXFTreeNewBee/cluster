@@ -37,5 +37,6 @@ class OS3E(object):
 		                 ("s47", "s40") : [3, 4] }
 		
 		self.SW_HOST, self.SWS, self.HOSTS = get_map(self.SW_LINK)
+
 		
 	

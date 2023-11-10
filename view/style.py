@@ -1,0 +1,44 @@
+# -*-coding:utf-8-*-
+controller_style={
+	"shape":'dot',
+	"color":"#FF6A6A",
+	"size":80,
+	"level":1,
+	"font":{
+		"size":40
+	}
+}
+switch_style={
+	"shape":'circle',
+	"color":"#1E90FF",
+	"size":50,
+	"level":2,
+	"font":{
+		"size":30
+	}
+}
+host_style={
+	"shape":'dot',
+	"color":"#1C1C1C",
+	"size":5,
+	"level":3,
+	"font":{
+		"size":5
+	}
+}
+host_link_style={
+	"color":"#BBFFFF",
+	"width":1
+}
+edge_style={
+	"color":"#00008B",
+	"width":3
+}
+internal_style={
+	"color":"#2F4F4F",
+	"width":3
+}
+controller_link_style={
+	"color":"#F0FFFF",
+	"width":3
+}
