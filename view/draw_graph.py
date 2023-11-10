@@ -1,6 +1,5 @@
 # -*-coding:utf-8-*-
 import time
-
 from pyvis.network import Network
 import sys
 from streamlit.components.v1 import html
@@ -12,7 +11,7 @@ from typing import List,Dict
 from jinja2 import Template
 from style import controller_style,switch_style,host_style,edge_style,internal_style,controller_link_style
 from random import Random
-
+import pandas as pd
 random=Random()
 
 net=Network()
@@ -63,13 +62,48 @@ def generate_topo (**kwargs) :
 	path_to_file=f'{parent_html_dir}/topo/{html_name}.html'
 	
 	net.save_graph(path_to_file)
-	
+
+	generate_cluster_config_table(kwargs)
+
 	show(file=path_to_notification)
 	
 	show(path_to_file)
 
-def generate_cluster_config_table(**kwargs):
-	pass
+def generate_cluster_config_table(args:dict):
+	with st.container():
+
+
+		df=pd.DataFrame({
+			"controllers": [controller for controller in args['CONTROLLERS']],
+			"IP":['127.0.0.1' for _ in range(len(args['CONTROLLERS']))],
+			"port": [port for port in args['CONTROLLER_PORTS']],
+			"switches": [sws for sws in args['SWS']],
+		})
+		column_config={
+			"switches":st.column_config.ListColumn(
+				label="交换机",
+				help="该控制下所掌管的交换机集合",
+				width="large"
+			),
+			"IP": st.column_config.ListColumn(
+				label="控制器IP",
+				help="控制器IP",
+				width="small"
+			),
+			"controllers": st.column_config.ListColumn(
+				label="控制器名称",
+				help="控制器",
+				width="small"
+			),"port":st.column_config.ListColumn(
+				label="控制器端口",
+				help="控制器服务端口",
+				width="small"
+			)
+		}
+		st.data_editor(df,column_config=column_config,
+					   hide_index=True
+					   )
+
 
 def show (file: str) :
 	if not os.path.exists(file) :
