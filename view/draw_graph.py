@@ -68,6 +68,8 @@ def generate_topo (**kwargs) :
 	
 	show(path_to_file)
 
+def generate_cluster_config_table(**kwargs):
+	pass
 
 def show (file: str) :
 	if not os.path.exists(file) :
@@ -77,7 +79,7 @@ def show (file: str) :
 		content = f.read()
 	
 	with st.container() :
-		html(content, width = 800, height = 600,scrolling = True)
+		html(content, width = 1000, height = 600,scrolling = True)
 
 
 	

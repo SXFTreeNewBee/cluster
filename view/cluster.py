@@ -68,6 +68,8 @@ class Cluster(object) :
 		self.topo_html_dir=None
 		
 		self.show_options()
+		
+		self.main_page()
 	def set_title(self):
 		st.title(self.name)
 	
@@ -78,7 +80,8 @@ class Cluster(object) :
 		self.controller(controller)
 		self.topo(topo)
 		self.other(other)
-		
+	def main_page(self):
+		pass
 	def server(self,server):
 		with server :
 			st.subheader("服务器配置")
@@ -86,7 +89,6 @@ class Cluster(object) :
 			self.IP = st.selectbox('Server监听IP地址', ('192.168.10.3', '127.0.0.1'))
 			
 			self.PORT = st.number_input("Server监听端口", value = 8888)
-			
 			
 	def controller(self,controller):
 		with controller:
@@ -109,9 +111,9 @@ class Cluster(object) :
 				os3e=OS3E()
 				
 			else:
-				#TODO
+				#TODO 自定义拓扑显示
 				pass
-			st.button(label = "生成拓扑",on_click = generate_topo,kwargs = os3e.__dict__)
+			st.button(label = "生成拓扑",on_click = generate_topo,kwargs = os3e.__dict__,key='topo_button')
 			
 	def other(self,other):
 		
@@ -121,5 +123,4 @@ class Cluster(object) :
 			
 			self.CONTROLLER_PKT_THRESHOLD=st.number_input("控制器阈值",value=1600)
 	
-	def generate_topo(self,**kwargs):
-		pass
+	
