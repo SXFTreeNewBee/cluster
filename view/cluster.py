@@ -1,15 +1,10 @@
 # -*-coding:utf-8-*-
-import streamlit as st
-from aiohttp import ClientSession
-import asyncio
-import aiofile
-from typing import Dict,List
-from default import OS3E
-from draw_graph import generate_topo
-from streamlit_autorefresh import st_autorefresh
-from utils.view import get_map
-import os
-from streamlit.components.v1 import html
+import sys
+sys.path.append('..')
+from view.topo.default.OS3E import OS3E
+from draw_graph import *
+
+
 def template(name, value):
 
 	if type(value)==str :
@@ -18,6 +13,8 @@ def template(name, value):
 		return f'{name}={value}\n'
 	
 bar=st.sidebar #图面编辑背景,侧面栏
+
+custom_topo_dir='topo'
 
 settings_path=''
 class Cluster(object) :
@@ -49,14 +46,6 @@ class Cluster(object) :
 		self.TOPO=None
 		self.CONTROLLERS=None
 		self.CONTROLLER_PORTS=None
-		self.EDGE_LINK=None
-		self.SW_LINK =None
-		self.SW_HOST=None
-		self.SWS=None
-		self.HOSTS=None
-		self.ADJACENCY_CONTROLLER=None
-		self.CONTROLLERS_EDGE_SWITCHES_AREA =None
-		self.CONTROLLER_EDGE_SWITCHES=None
 		#MAC
 		self.UNKNOWN_MAC='00:00:00:00:00:00'
 		self.BROADCAST_MAC = 'ff:ff:ff:ff:ff:ff'
@@ -64,24 +53,28 @@ class Cluster(object) :
 		self.IF_ARP=None
 		#控制器过载阈值
 		self.CONTROLLER_PKT_THRESHOLD=None
-		#拓扑文件
-		self.topo_html_dir=None
+		
+		#开关
+		
+		#拓扑方法对象
+		self.topo_object=None
 		
 		self.show_options()
 		
-		self.main_page()
+		
 	def set_title(self):
 		st.title(self.name)
 	
 	def show_options(self):
-		server,  controller, topo,other= bar.tabs(
-			["Server参数", "控制器","拓扑","其他选项"])
+		server,  controller, topo,other,run= bar.tabs(
+			["Server", "控制器","拓扑","其他选项","生成网络"])
+
 		self.server(server)
 		self.controller(controller)
 		self.topo(topo)
 		self.other(other)
-	def main_page(self):
-		pass
+		self.run(run)
+		
 	def server(self,server):
 		with server :
 			st.subheader("服务器配置")
@@ -89,7 +82,8 @@ class Cluster(object) :
 			self.IP = st.selectbox('Server监听IP地址', ('192.168.10.3', '127.0.0.1'))
 			
 			self.PORT = st.number_input("Server监听端口", value = 8888)
-			
+	
+	
 	def controller(self,controller):
 		with controller:
 			st.subheader("控制器配置")
@@ -104,18 +98,40 @@ class Cluster(object) :
 			
 	def topo(self,topo):
 		
+		def analyse_topo():
+			st.write("按照OS3E拓扑形式，给出自定义拓扑的相关参数")
+			st.write("拓扑地址：../view/dedfault")
+			topo_file = st.file_uploader("自定义拓扑文件"
+			                             , accept_multiple_files = False,
+			                             )
+			if topo_file:
+				try:
+					custom_topo_path = f'{custom_topo_dir}/custom/{topo_file.name}'
+					with open(custom_topo_path,'wb') as f:
+						
+						f.write(topo_file.getvalue())
+						
+				except Exception as e:
+					raise e
+				topo_package_dir=custom_topo_path.strip('.py').split('/')
+
+				package = __import__('.'.join(topo_package_dir), fromlist = [topo_package_dir[-1]])
+				
+				topo_class=getattr(package, topo_package_dir[-1])
+				
+				return topo_class()
 		with topo:
 			st.subheader("拓扑配置选项(不显示主机)")
 			self.TOPO = st.selectbox('拓扑样式', ("OS3E","自定义拓扑"))
 			if self.TOPO=="OS3E":
-				os3e=OS3E()
-				
+				self.topo_object=OS3E()
+			
 			else:
-				#TODO 自定义拓扑显示
-				pass
-			st.button(label = "生成拓扑",on_click = generate_topo,kwargs = os3e.__dict__,
-					  key='topo_button',use_container_width=True)
-
+				self.topo_object=analyse_topo()
+			
+				
+			
+			
 	def other(self,other):
 		
 		with other:
@@ -124,4 +140,9 @@ class Cluster(object) :
 			
 			self.CONTROLLER_PKT_THRESHOLD=st.number_input("控制器阈值",value=1600)
 	
-	
+	def run(self,run):
+		with run:
+			if self.topo_object:
+				st.button(label = "生成网络", on_click = generate_network, kwargs = self.topo_object.__dict__,
+				          key = 'topo_button', use_container_width = True)
+				

@@ -1,6 +1,6 @@
 # -*-coding:utf-8-*-
 from typing import Dict,List
-def get_map (LINKS: Dict) :
+def get_map (LINKS: dict,CONTROLLERS:list) :
 	PREPARE = ["s" + str(i) for i in range(10, 60)]
 	ALL = PREPARE.copy()
 	for k in LINKS.keys() :
@@ -13,8 +13,8 @@ def get_map (LINKS: Dict) :
 		ALL.remove(h)
 	
 	HOSTS = { }
-	SW_LIST = [[] for _ in range(5)]  # 5个控制器
-	HOST_LIST = [[] for _ in range(5)]
+	SW_LIST = [[] for _ in range(len(CONTROLLERS))]  # n个控制器
+	HOST_LIST = [[] for _ in range(len(CONTROLLERS))]
 	
 	def h (x) :
 		# 3 台主机

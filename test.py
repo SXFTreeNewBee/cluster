@@ -1,4 +1,7 @@
 # -*-coding:utf-8-*-
+s='view/topo/custom/OS3E.py'
 
-a=[num for num in range(100,100*(7+1),100)]
-print(a)
+path_dir=s.strip('.py').split('/')
+
+package=__import__('.'.join(path_dir),fromlist = [path_dir[-1]])
+print(getattr(package,path_dir[-1])().__dict__)

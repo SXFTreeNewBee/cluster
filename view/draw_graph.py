@@ -20,14 +20,15 @@ parent_html_dir='../static/'
 
 path_to_notification='../static/notify/notification.html'
 
-def generate_topo (**kwargs) :
+topo_html_dir=None
+def generate_network (**kwargs) :
+	global topo_html_dir,if_generate_topo
 	html_name=kwargs['name']
 	controllers=kwargs["CONTROLLERS"]
 	edge_link=kwargs['EDGE_LINK']
 	sw_link=kwargs['SW_LINK']
-	sw_host=kwargs['SW_HOST']
 	sws=kwargs['SWS']
-	hosts=kwargs['HOSTS']
+
 	#添加控制器
 
 	for controller in controllers:
@@ -63,57 +64,74 @@ def generate_topo (**kwargs) :
 	
 	net.save_graph(path_to_file)
 
-	generate_cluster_config_table(kwargs)
-
-	show(file=path_to_notification)
+	show_notify()
 	
-	show(path_to_file)
-
-def generate_cluster_config_table(args:dict):
-	with st.container():
-
-
-		df=pd.DataFrame({
-			"controllers": [controller for controller in args['CONTROLLERS']],
-			"IP":['127.0.0.1' for _ in range(len(args['CONTROLLERS']))],
-			"port": [port for port in args['CONTROLLER_PORTS']],
-			"switches": [sws for sws in args['SWS']],
-		})
-		column_config={
-			"switches":st.column_config.ListColumn(
-				label="交换机",
-				help="该控制下所掌管的交换机集合",
-				width="large"
-			),
-			"IP": st.column_config.ListColumn(
-				label="控制器IP",
-				help="控制器IP",
-				width="small"
-			),
-			"controllers": st.column_config.ListColumn(
-				label="控制器名称",
-				help="控制器",
-				width="small"
-			),"port":st.column_config.ListColumn(
-				label="控制器端口",
-				help="控制器服务端口",
-				width="small"
-			)
-		}
-		st.data_editor(df,column_config=column_config,
-					   hide_index=True
-					   )
-
-
-def show (file: str) :
+	topo_html_dir=path_to_file
+	
+	show_main_page(kwargs)
+def show_main_page (args:dict) :
+	topo_image, cluster_info, cluster_status = st.tabs(['拓扑图', '网络配置信息', '网络状态'])
+	
+	with topo_image :
+		show_topo()
+	with cluster_info:
+		show_info(args)
+	with cluster_status:
+		show_status()
+def show_notify () :
+	
+	file=path_to_notification
+	
 	if not os.path.exists(file) :
 		raise FileNotFoundError
 	
 	with open(file, 'r', encoding = 'utf-8') as f :
 		content = f.read()
 	
-	with st.container() :
-		html(content, width = 1000, height = 600,scrolling = True)
-
-
+	html(content, width = 0, height = 0)#加载弹窗
+def show_topo () :
+	global topo_html_dir
+	
+	file=topo_html_dir
+	
+	if not os.path.exists(file) :
+		raise FileNotFoundError
+	
+	with open(file, 'r', encoding = 'utf-8') as f :
+		content = f.read()
+	
+	html(content, width = 1000, height = 600, scrolling = True)#加载拓扑图
+def show_info(args:dict):
+	df = pd.DataFrame({
+		"controllers" : [controller for controller in args['CONTROLLERS']],
+		"IP" : ['127.0.0.1' for _ in range(len(args['CONTROLLERS']))],
+		"port" : [port for port in args['CONTROLLER_PORTS']],
+		"switches" : [sws for sws in args['SWS']],
+	})
+	column_config = {
+		"switches" : st.column_config.ListColumn(
+			label = "交换机",
+			help = "该控制下所掌管的交换机集合",
+			width = "large"
+		),
+		"IP" : st.column_config.ListColumn(
+			label = "IP",
+			help = "控制器IP",
+			width = "small"
+		),
+		"controllers" : st.column_config.ListColumn(
+			label = "名称",
+			help = "控制器名称",
+			width = "small"
+		), "port" : st.column_config.ListColumn(
+			label = "端口",
+			help = "控制器服务端口",
+			width = "small"
+		)
+	}
+	st.data_editor(df, column_config = column_config,
+	               hide_index = True
+	               )
+def show_status():
+	pass
 	
