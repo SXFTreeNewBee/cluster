@@ -1,1 +1,2 @@
 #!/bin/bash
+streamlit run "/home/ryu/multicontroller/cluster/view/main.py"

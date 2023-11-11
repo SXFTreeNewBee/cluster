@@ -1,12 +1,15 @@
 # -*-coding:utf-8-*-
-#默认拓扑选项OS3E
+# -*-coding:utf-8-*-
+# 默认拓扑选项OS3E
 import sys
-sys.path.append('..')
+
+sys.path.append('../..')
 import streamlit as st
 from utils.view import get_map
-class OS3E(object):
-	def __init__(self):
-		self.name='OS3E'
+
+class OS3E(object) :
+	def __init__ (self) :
+		self.name = 'OS3E'
 		self.CONTROLLERS = st.multiselect(label = "控制器节点(OS3E默认配置)",
 		                                  options = ['c' + str(num) for num in range(0, 10)],
 		                                  default = ['c0', 'c1', 'c2', 'c3', 'c4'],
@@ -36,6 +39,27 @@ class OS3E(object):
 		                 ("s44", "s45") : [3, 2], ("s45", "s46") : [3, 2], ("s46", "s47") : [3, 2],
 		                 ("s47", "s40") : [3, 4] }
 		
-		self.SW_HOST, self.SWS, self.HOSTS = get_map(self.SW_LINK)
+		self.SW_HOST, self.SWS, self.HOSTS = get_map(LINKS=self.SW_LINK,CONTROLLERS=self.CONTROLLERS)
 		
-	
+		self.ADJACENCY_CONTROLLER = {
+			"c1" : ["c2", "c3"],
+			"c3" : ["c1", "c2", "c4", "c5"],
+			"c2" : ["c1", "c5", "c3"],
+			"c4" : ["c3", "c5"],
+			"c5" : ["c2", "c3", "c4"]
+		}
+		self.CONTROLLERS_EDGE_SWITCHES_AREA = {
+			"c1" : { ("s13", 3) : 2, ("s15", 5) : 2, ("s16", 4) : 1 },
+			"c2" : { ("s22", 2) : 2, ("s21", 2) : 0, ("s23", 2) : 2, ("s24", 3) : 4, ("s26", 3) : 4 },
+			"c3" : { ("s31", 2) : 0, ("s31", 4) : 1, ("s32", 2) : 1, ("s33", 2) : 0, ("s33", 3) : 3, ("s34", 3) : 4 },
+			"c4" : { ("s43", 2) : 2, ("s40", 2) : 4 },
+			"c5" : { ("s51", 2) : 1, ("s52", 2) : 2, ("s54", 3) : 3, ("s55", 2) : 1 }
+		}
+		self.CONTROLLER_EDGE_SWITCHES = {
+			"c1" : ["s13", "s15", "s16"],
+			"c2" : ["s22", "s21", "s23", "s24", "s26"],
+			"c3" : ["s31", "s32", "s33", "s34"],
+			"c4" : ["s43", "s40"],
+			"c5" : ["s51", "s52", "s54", "s55"]
+		}
+

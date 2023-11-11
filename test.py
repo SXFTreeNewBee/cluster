@@ -1,5 +1,8 @@
-# -*-coding:utf-8-*-
-class os3e :
-	def __init__(self):
-		self.a=1
-print(os3e().__dict__)
+class a:
+    def __init__(self):
+        self.value=1
+
+class b:
+    def __init__(self):
+        self.v=3
+print(a().__dict__)
