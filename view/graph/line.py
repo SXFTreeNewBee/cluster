@@ -1,41 +1,56 @@
-# -*-coding:utf-8-*-
-#曲线图
-import pyecharts.options as opts
-from pyecharts.charts import Line
-from streamlit_echarts import st_pyecharts
-"""
-Gallery 使用 pyecharts 1.1.0
-参考地址: https://echarts.apache.org/examples/editor.html?c=area-basic
-
-目前无法实现的功能:
-
-暂无
-"""
-
-x_data = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
-y_data = [820, 932, 901, 934, 1290, 1330, 1320]
-
-
-(
-    Line()
-    .add_xaxis(xaxis_data=x_data)
-    .add_yaxis(
-        series_name="",
-        y_axis=y_data,
-        symbol="emptyCircle",
-        is_symbol_show=True,
-        label_opts=opts.LabelOpts(is_show=False),
-        areastyle_opts=opts.AreaStyleOpts(opacity=1, color="#C67570"),
-    )
-    .set_global_opts(
-        tooltip_opts=opts.TooltipOpts(is_show=False),
-        yaxis_opts=opts.AxisOpts(
-            type_="value",
-            axistick_opts=opts.AxisTickOpts(is_show=True),
-            splitline_opts=opts.SplitLineOpts(is_show=True),
-        ),
-        xaxis_opts=opts.AxisOpts(type_="category", boundary_gap=False),
-    )
-    # 设置 boundary_gap 的时候一定要放在最后一个配置项里, 不然会被覆盖
-    .render("basic_area_chart.html")
-)
+option = {
+  xAxis: {
+    type: 'category',
+    boundaryGap: false
+  },
+  yAxis: {
+    type: 'value',
+    boundaryGap: [0, '30%']
+  },
+  visualMap: {
+    type: 'piecewise',
+    show: false,
+    dimension: 0,
+    seriesIndex: 0,
+    pieces: [
+      {
+        gt: 1,
+        lt: 3,
+        color: 'rgba(0, 0, 180, 0.4)'
+      },
+      {
+        gt: 5,
+        lt: 7,
+        color: 'rgba(0, 0, 180, 0.4)'
+      }
+    ]
+  },
+  series: [
+    {
+      type: 'line',
+      smooth: 0.6,
+      symbol: 'none',
+      lineStyle: {
+        color: '#5470C6',
+        width: 5
+      },
+      markLine: {
+        symbol: ['none', 'none'],
+        label: { show: false },
+        data: [{ xAxis: 1 }, { xAxis: 3 }, { xAxis: 5 }, { xAxis: 7 }]
+      },
+      areaStyle: {},
+      data: [
+        ['2019-10-10', 200],
+        ['2019-10-11', 560],
+        ['2019-10-12', 750],
+        ['2019-10-13', 580],
+        ['2019-10-14', 250],
+        ['2019-10-15', 300],
+        ['2019-10-16', 450],
+        ['2019-10-17', 300],
+        ['2019-10-18', 100]
+      ]
+    }
+  ]
+};
