@@ -71,7 +71,9 @@ def generate_network (**kwargs) :
 	
 	show_main_page(kwargs)
 def show_main_page (args:dict) :
+	
 	st.header("集群状态")
+	
 	topo_image, cluster_info, cluster_status = st.tabs(['拓扑图', '网络配置信息', '网络状态'])
 	
 	with topo_image :
