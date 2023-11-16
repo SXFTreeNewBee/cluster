@@ -129,9 +129,6 @@ class Cluster(object) :
 			else:
 				self.topo_object=analyse_topo()
 			
-				
-			
-			
 	def other(self,other):
 		
 		with other:

@@ -3,7 +3,8 @@ import time
 from pyvis.network import Network
 import sys
 from streamlit.components.v1 import html
-sys.path.append('..')
+sys.path.append('../')
+import config
 import streamlit as st
 import os
 import aiofile
@@ -70,6 +71,7 @@ def generate_network (**kwargs) :
 	
 	show_main_page(kwargs)
 def show_main_page (args:dict) :
+	st.header("集群状态")
 	topo_image, cluster_info, cluster_status = st.tabs(['拓扑图', '网络配置信息', '网络状态'])
 	
 	with topo_image :
