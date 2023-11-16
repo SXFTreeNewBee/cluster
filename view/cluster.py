@@ -17,6 +17,8 @@ bar=st.sidebar #图面编辑背景,侧面栏
 custom_topo_dir='topo'
 
 settings_path=''
+
+config_path='../config.py'
 class Cluster(object) :
 	def __init__ (self, **kwargs) :
 		self.name = kwargs['name']
@@ -139,7 +141,35 @@ class Cluster(object) :
 	
 	def run(self,run):
 		with run:
+			st.subheader("先保存再生成")
 			if self.topo_object:
-				st.button(label = "生成网络", on_click = generate_network, kwargs = self.topo_object.__dict__,
-				          key = 'topo_button', use_container_width = True)
+
+				button_state={
+					'save_button':False,
+					'network_button':True
+				}
+
+				if 'button_state' not in st.session_state:
+					st.session_state.button_state=button_state
+
+				save_button=st.button(label="保存配置", on_click=self.save_config, kwargs=self.__dict__,
+						  key='save_button', use_container_width=True,disabled=st.session_state.button_state.get('save_button'))
+
+				if save_button:
+
+					st.session_state.button_state['network_button']=False
+
+				network_button=st.button(label="生成网络", on_click=generate_network, kwargs=self.topo_object.__dict__,
+						  key='network_button', use_container_width=True,
+						  disabled=st.session_state.button_state.get('network_button'))
+
+	def save_config(self,**kwargs):
+
+		with open(config_path,'w+') as f :
+			for k,v in kwargs.items():
+				if k=="topo_object":
+					continue
+				f.write(template(name=k,value=v))
+
+		show_notify()
 				
