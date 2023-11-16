@@ -3,14 +3,7 @@ import sys
 sys.path.append('..')
 from view.topo.default.OS3E import OS3E
 from draw_graph import *
-
-
-def template(name, value):
-
-	if type(value)==str :
-		return f'{name}=\'{value}\'\n'
-	else:
-		return f'{name}={value}\n'
+from utils.trans_to_config import save_config
 	
 bar=st.sidebar #图面编辑背景,侧面栏
 
@@ -21,7 +14,6 @@ settings_path=''
 config_path='../config.py'
 class Cluster(object) :
 	def __init__ (self, **kwargs) :
-		self.name = kwargs['name']
 		#凡是为None的，代表是可设置变量
 		#Server
 		self.MsgBarrier='/' #写死
@@ -151,8 +143,10 @@ class Cluster(object) :
 
 				if 'button_state' not in st.session_state:
 					st.session_state.button_state=button_state
-
-				save_button=st.button(label="保存配置", on_click=self.save_config, kwargs=self.__dict__,
+				
+				param={**self.__dict__,**self.topo_object.__dict__}
+		
+				save_button=st.button(label="保存配置", on_click=self.save_config, kwargs=param,
 						  key='save_button', use_container_width=True,disabled=st.session_state.button_state.get('save_button'))
 
 				if save_button:
@@ -165,11 +159,7 @@ class Cluster(object) :
 
 	def save_config(self,**kwargs):
 
-		with open(config_path,'w+') as f :
-			for k,v in kwargs.items():
-				if k=="topo_object":
-					continue
-				f.write(template(name=k,value=v))
+		save_config(config_path,**kwargs)
 
 		show_notify()
 				

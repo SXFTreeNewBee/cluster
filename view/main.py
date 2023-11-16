@@ -15,5 +15,5 @@ from streamlit_autorefresh import st_autorefresh
 from cluster import Cluster
 
 if __name__ == '__main__':
-	cluster=Cluster(name = 'cluster')
+	cluster=Cluster()
 	
