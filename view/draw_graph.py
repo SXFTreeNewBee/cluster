@@ -3,7 +3,9 @@ import time
 from pyvis.network import Network
 import sys
 from streamlit.components.v1 import html
-sys.path.append('..')
+sys.path.append('../')
+from utils.trans_to_config import save_config
+import config
 import streamlit as st
 import os
 import aiofile
@@ -21,6 +23,8 @@ parent_html_dir='../static/'
 path_to_notification='../static/notify/notification.html'
 
 topo_html_dir=None
+
+config_path='../config.py'
 def generate_network (**kwargs) :
 	global topo_html_dir
 	html_name=kwargs['name']
@@ -28,7 +32,7 @@ def generate_network (**kwargs) :
 	edge_link=kwargs['EDGE_LINK']
 	sw_link=kwargs['SW_LINK']
 	sws=kwargs['SWS']
-
+	
 	#添加控制器
 
 	for controller in controllers:
@@ -71,6 +75,9 @@ def generate_network (**kwargs) :
 	show_main_page(kwargs)
 
 def show_main_page (args:dict) :
+	
+	st.header("集群状态")
+	
 	topo_image, cluster_info, cluster_status = st.tabs(['拓扑图', '网络配置信息', '网络状态'])
 	
 	with topo_image :
